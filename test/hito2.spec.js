@@ -1,4 +1,4 @@
-const mdLinks = require("../hito1.js")// Asegúrate de proporcionar la ruta correcta al archivo mdLinks.js
+const mdLinks = require("../md-links.js")// Asegúrate de proporcionar la ruta correcta al archivo mdLinks.js
 const axios = require('axios');
 
 /// Prueba básica para mdLinks sin validación

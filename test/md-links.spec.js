@@ -1,4 +1,4 @@
-const mdLinks = require("../hito1.js")
+const mdLinks = require("../md-links.js");
 const fs = require('fs/promises');
 const path = require('path');
 
