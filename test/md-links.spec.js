@@ -3,7 +3,6 @@ const fs = require('fs/promises');
 const path = require('path');
 
 // Creamos el mock
-
 jest.mock('fs/promises');
 
 describe('mdLinks', () => {
@@ -52,15 +51,6 @@ describe('mdLinks', () => {
       expect(error.message).toBe('El archivo no es Markdown');
     }
   });
-
-
-
-
-
-
-
-
-
-
+  
 });// end describe
 
