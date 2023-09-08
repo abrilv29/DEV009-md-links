@@ -1,0 +1,7 @@
+Mocks: son funciones simuladas es decir lo que no podemos testear en si como las web API's , pero si podemos testear las funciones que creamos que se vinculan con la api.
+Jest.fn():es una función que se utiliza para crear una función simulada (mock function).
+toHaveBeenCalledWith: espera que la función haya sido llamada con argumentos específicos.
+toHaveBeenCalled: solo verifica si la función fue llamada.
+spyOn: es una función que se utiliza para espiar una función y  verificar si ha sido llamada.
+
+jest https://jestjs.io/es-ES/docs/mock-function-api
