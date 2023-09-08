@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 const figlet = require('figlet');
 const chalk = require('chalk');
-const mdLinks = require('./hito3-1.js');
+const mdLinks = require('./index.js');
 const yargs = require('yargs');
+const cliBoxes = require('cli-boxes');
 
 // Título de la CLI
 figlet('MD - LINKS!!!', function (err, data) {
@@ -44,9 +45,14 @@ const { ruta, validate, stats } = yargs.argv;
 // Función para mostrar enlaces en un formato específico
 const mostrarEnlaces = (links) => {
   return links.map((link) => {
-    let output = `${chalk.green('href:')} ${chalk.yellow(link.href)} \n`;
+
+    let output;
+    
+    output = `${chalk.green('href:')} ${chalk.yellow(link.href)} \n`;
     output += `${chalk.green('Text:')} ${chalk.magenta(link.text)} \n`;
     output += `${chalk.green('File:')} ${chalk.cyan(link.file)}\n`;
+
+    
 
     if (validate) {
       output += ` ${chalk.green('Status:')} ${chalk.red(link.status)} \n`;
@@ -73,8 +79,14 @@ const optionStats = (ruta) => {
       if (stats) {
         const totalLinks = links.length;
         const uniqueLinks = new Set(links.map((link) => link.href)).size;
-        console.log(`${chalk.cyanBright('Total:')} ${chalk.cyan(totalLinks)}`);
-        console.log(`${chalk.greenBright('Unique:')} ${chalk.green(uniqueLinks)}`);
+        const boxStyle = cliBoxes.singleDouble; // Obtener el estilo de caja
+        const labelWidth = 8;
+        const boxedOutput =
+        `${boxStyle.topLeft}${boxStyle.top.repeat(22)}${boxStyle.topRight}\n` +
+        `${boxStyle.left}${`${chalk.cyanBright('Total:')}${chalk.cyan(totalLinks)}`.padEnd(50 - labelWidth, ' ')}${boxStyle.right}\n` +
+        `${boxStyle.left}${`${chalk.greenBright('Unique:')}${chalk.green(uniqueLinks)}`.padEnd(50 - labelWidth, ' ')}${boxStyle.right}\n` +
+        `${boxStyle.bottomLeft}${boxStyle.bottom.repeat(22)}${boxStyle.bottomRight}`;
+        console.log(boxedOutput);
       } else {
         const formattedLinks = mostrarEnlaces(links);
         formattedLinks.forEach((formattedLink) => console.log(formattedLink));
@@ -86,28 +98,32 @@ const optionStats = (ruta) => {
 };
 
 const optionValidateStats = (ruta) => {
-    mdLinks(ruta, { validate })
-      .then((links) => {
-        if (stats) {
-          const totalLinks = links.length;
-          const uniqueLinks = new Set(links.map((link) => link.href)).size;
-  
-          // Filtrar los enlaces rotos (FAIL)
-          const brokenLinks = links.filter((link) => link.status === 'fail').length;
-  
-          console.log(`${chalk.cyanBright('Total:')} ${chalk.cyan(totalLinks)}`);
-          console.log(`${chalk.greenBright('Unique:')} ${chalk.green(uniqueLinks)}`);
-          console.log(`${chalk.redBright('Broken:')} ${chalk.red(brokenLinks)}`);
-        } else {
-          const formattedLinks = mostrarEnlaces(links);
-          formattedLinks.forEach((formattedLink) => console.log(formattedLink));
-        }
-      })
-      .catch((error) => {
-        console.error(error.message);
-      });
-  };
-  
+  mdLinks(ruta, { validate: true })
+    .then((links) => {
+      if (stats) {
+        const totalLinks = links.length;
+        const uniqueLinks = new Set(links.map((link) => link.href)).size;
+        const brokenLinks = links.filter((link) => link.ok === 'fail').length; // Filtra los enlaces rotos
+
+        const boxStyle = cliBoxes.singleDouble; // Obtener el estilo de caja
+        const labelWidth = 8;
+        const boxedOutput =
+        `${boxStyle.topLeft}${boxStyle.top.repeat(22)}${boxStyle.topRight}\n` +
+        `${boxStyle.left}${`${chalk.cyanBright('Total:')}${chalk.cyan(totalLinks)}`.padEnd(50 - labelWidth, ' ')}${boxStyle.right}\n` +
+        `${boxStyle.left}${`${chalk.greenBright('Unique:')}${chalk.green(uniqueLinks)}`.padEnd(50 - labelWidth, ' ')}${boxStyle.right}\n` +
+        `${boxStyle.left}${`${chalk.redBright('Broken:')}${chalk.red(brokenLinks)}`.padEnd(50 - labelWidth, ' ')}${boxStyle.right}\n` +
+        `${boxStyle.bottomLeft}${boxStyle.bottom.repeat(22)}${boxStyle.bottomRight}`;
+        console.log(boxedOutput);
+      } else {
+        const formattedLinks = mostrarEnlaces(links);
+        formattedLinks.forEach((formattedLink) => console.log(formattedLink));
+      }
+    })
+    .catch((error) => {
+      console.error(error.message);
+    });
+};
+
   
 // Determina qué función llamar según las opciones
 if (validate && stats) {
