@@ -42,17 +42,17 @@ yargs
 
 const { ruta, validate, stats } = yargs.argv;
 
+
+
 // Función para mostrar enlaces en un formato específico
 const mostrarEnlaces = (links) => {
   return links.map((link) => {
 
     let output;
-    
+
     output = `${chalk.green('href:')} ${chalk.yellow(link.href)} \n`;
     output += `${chalk.green('Text:')} ${chalk.magenta(link.text)} \n`;
     output += `${chalk.green('File:')} ${chalk.cyan(link.file)}\n`;
-
-    
 
     if (validate) {
       output += ` ${chalk.green('Status:')} ${chalk.red(link.status)} \n`;
@@ -60,6 +60,7 @@ const mostrarEnlaces = (links) => {
     }
     return output;
   });
+  
 };
 
 const optionValidate = (ruta) => {
@@ -74,7 +75,7 @@ const optionValidate = (ruta) => {
 };
 
 const optionStats = (ruta) => {
-  mdLinks(ruta, { validate: false }) // No se necesita validación aquí
+  mdLinks(ruta, { validate: true }) // No se necesita validación aquí
     .then((links) => {
       if (stats) {
         const totalLinks = links.length;

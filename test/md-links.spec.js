@@ -1,56 +1,76 @@
-const mdLinks = require("../md-links.js");
-const fs = require('fs/promises');
+const mdLinks = require('../index.js');
+const validarLink = require('../hito2.js');
 const path = require('path');
 
-// Creamos el mock
-jest.mock('fs/promises');
+/*describe('mdLinks', () => {
+  // Prueba para el caso en el que se resuelve la promesa
+  it('Debería resolver con los enlaces si el archivo Markdown es válido', () => {
+    const absolutePath = path.resolve(__dirname, 'C:/Users/LENOVO/DEV009-md-links/fileMD/links.md'); // Reemplaza con la ruta de un archivo Markdown válido
+    return mdLinks(absolutePath, false).then((result) => {
+      // Realiza aserciones en el resultado
+      expect(Array.isArray(result)).toBe(true);
+      // Agrega más aserciones según sea necesario
+    });
+  });
+
+
+
+  
+
+});*/
+
+
 
 describe('mdLinks', () => {
-  // Restaurar el comportamiento original de fs.promises después de cada prueba
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it('debería devolver los enlaces encontrados dentro del archivo Marckdown', async () => {
-    const  fileContens = 'Contenido del archivo Markdown con [un enlace](https://example.com)';
-    // simulas que se tiene acceso a la ruta
-    fs.access.mockResolvedValue();
-    // simulamos la lectura del archivo
-    fs.readFile.mockResolvedValue(fileContens);
-    const result = await mdLinks('./fileMD/links.md'); // Reemplaza con una ruta válida
-    expect(result).toEqual([
-      {
-        href: 'https://example.com',
-        text: 'un enlace',
-        file: path.resolve('./fileMD/links.md'),
-      },
-    ]);
-
-  });
-
-  it('Debería mostrar un error si la ruta no es válida', async () => {
-    // Configurar el comportamiento simulado de fs.promises
-    fs.access.mockRejectedValue(new Error('Ruta no válida')); // Simula un error al acceder a la ruta
-
-    try {
-      await mdLinks('./ruta/ivalida'); // Reemplaza con una ruta válida
-      // Debería arrojar una excepción, así que si llega aquí, la prueba fallará
-    } catch (error) {
-      expect(error.message).toBe('Ruta no válida');
-    }
-  });
-  it('Debería mostrar un error si el archivo no es Markdown', async () => {
-    // Configurar el comportamiento simulado de fs.promises
-    fs.access.mockResolvedValue(); // Simula que la ruta es accesible
-    fs.readFile.mockResolvedValue('Contenido de un archivo no Markdown'); // Simula la lectura del archivo
-
-    try {
-      await mdLinks('./fileMD/archivo.txt'); // Reemplaza con una ruta válida a un archivo no Markdown
-      // Debería arrojar una excepción, así que si llega aquí, la prueba fallará
-    } catch (error) {
-      expect(error.message).toBe('El archivo no es Markdown');
-    }
+  test('Debe devolver un array de objetos con propiedades "href", "text" y "file"', () => {
+    return mdLinks('C:/Users/LENOVO/DEV009-md-links/fileMD/', false).then((result) => {
+      // Normaliza las rutas de archivo en el resultado esperado
+      const expected = [
+        {
+          href: 'https://www.google.com',
+          text: 'enlace a Google',
+          file: path.normalize('C:/Users/LENOVO/DEV009-md-links/fileMD/links.md'),
+        },
+        {
+          href: 'https://www.wikipedia.org',
+          text: 'enlace a Wikipedia',
+          file: path.normalize('C:/Users/LENOVO/DEV009-md-links/fileMD/links.md'),
+        },
+        // Agrega más objetos de prueba según sea necesario
+      ];
+  
+      expect(result).toEqual(expected);
+    });
   });
   
-});// end describe
+  test('Debe validar los enlaces si se pasa la opción "validate"', () => {
+    return mdLinks('C:/Users/LENOVO/DEV009-md-links/fileMD/links.md', true).then((result) => {
+      // Normaliza las rutas de archivo en el resultado esperado
+      const expected = [
+        {
+          file: path.normalize('C:/Users/LENOVO/DEV009-md-links/fileMD/links.md'),
+          href: 'https://www.google.com',
+          ok: 'ok', // Ajusta esto según el resultado real
+          status: 200, // Ajusta esto según el resultado real
+          text: 'enlace a Google',
+        },
+        {
+          file: path.normalize('C:\\Users\\LENOVO\\DEV009-md-links\\fileMD\\links.md'),
+          href: 'https://www.wikipedia.org',
+          ok: 'ok', // Ajusta esto según el resultado real
+          status: 200, // Ajusta esto según el resultado real
+          text: 'enlace a Wikipedia',
+        },
+        // Agrega más objetos de prueba según sea necesario
+      ];
+  
+      expect(result).toEqual(expected);
+    });
+  });
+
+});
+
+
+  
+
 

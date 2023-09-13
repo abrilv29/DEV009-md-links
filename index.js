@@ -13,6 +13,7 @@ const mdLinks = (absolutaPath, validate) => {
     fs.access(convertAbsoluta)
       .then(() => {
         // Leer la información del archivo o directorio
+        
         return fs.stat(convertAbsoluta);
       })
       .then((stats) => {
