@@ -14,7 +14,9 @@ const mdLinks = (absolutaPath, validate) => {
           const results = []; // Almacena los resultados encontrados
 
           const processItem = (item) => {
-            const itemPath = path.join(directoryPath, item); // Obtiene la ruta completa del item
+            let lineLinks = [];
+            const itemPath = path.join(directoryPath, item);
+            // Obtiene la ruta completa del item
             return fs.stat(itemPath).then((itemStat) => {
               if (itemStat.isDirectory()) {
                 // Si es un directorio, llama recursivamente a la función en ese directorio
@@ -25,22 +27,27 @@ const mdLinks = (absolutaPath, validate) => {
                 // Si es un archivo .md, procesa el contenido
                 return fs.readFile(itemPath, 'utf-8').then((fileContent) => {
                   const md = markdownIt();
-                  const html = md.render(fileContent); // Convierte el contenido Markdown a HTML
-                  const links = encontrarLinks(html, itemPath); // Encuentra los links en el HTML
+                  const lines = fileContent.split('\n');
 
-                  if (!validate) {
-                    // Si no se requiere validación, agrega los links al resultado
-                    results.push(...links);
-                  } else {
-                    // Si se requiere validación, valida los enlaces y luego agrega los resultados
-                    const linkPromises = links.map((link) => {
-                      return validarLink(link); // Valida el enlace
-                    });
+                  const lineLinkPromises = lines.map((line, lineNumbrer) => {
+                    const html = md.render(line); // Convierte el contenido Markdown a HTML
+                    const links = encontrarLinks(html, itemPath, lineNumbrer + 1); // Encuentra los links en el HTML
+                    results.push(...links); // Agregar los links encontrados al resultado
 
-                    return Promise.all(linkPromises).then((validados) => {
-                      results.push(...validados); // Agrega los resultados validados al resultado principal
-                    });
-                  }
+                    if (validate) {
+                      // Si se requiere validación, crea un array de promesas de validación para los links de esta línea
+                      const linkPromises = links.map((link) => {
+                        return validarLink(link); // Valida el enlace
+                      });
+
+                      return Promise.all(linkPromises); // Retorna un array de promesas de validación
+                    }
+
+                    return [];
+                  });
+
+                  // Espera a que todas las promesas de validación se resuelvan antes de continuar
+                  return Promise.all(lineLinkPromises);
                 });
               }
             });

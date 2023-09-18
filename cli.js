@@ -51,11 +51,12 @@ const mostrarEnlaces = (links) => {
   
     output = `${chalk.green('href:')} ${chalk.yellow(link.href)} \n`;
     output += `${chalk.green('Text:')} ${chalk.magenta(link.text)} \n`;
-    output += `${chalk.green('File:')} ${chalk.cyan(link.file)}\n`;
+    output += `${chalk.green('File:')} ${chalk.hex('#05CBE6')(link.file)}\n`;
+    output += `${chalk.green('Line:')} ${chalk.hex('#A233FF').bold(link.line)}\n`; // Agregar la línea
  
     if (validate) {
-      output += ` ${chalk.green('Status:')} ${chalk.red(link.status)} \n`;
-      output += ` ${chalk.green('Ok:')} ${chalk.blue(link.ok)}\n`;
+      output += ` ${chalk.green('Status:')} ${chalk.red.bold(link.status)} \n`;
+      output += ` ${chalk.green('Ok:')} ${chalk.hex('#FDB606').bold(link.ok)}\n`;
     }
     return output;
   });

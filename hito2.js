@@ -18,4 +18,4 @@ function validarLink(link) {
   }
   
 
-module.exports = validarLink
+module.exports = validarLink;
