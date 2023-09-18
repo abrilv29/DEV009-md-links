@@ -47,13 +47,12 @@ const { ruta, validate, stats } = yargs.argv;
 // Función para mostrar enlaces en un formato específico
 const mostrarEnlaces = (links) => {
   return links.map((link) => {
-
     let output;
-
+  
     output = `${chalk.green('href:')} ${chalk.yellow(link.href)} \n`;
     output += `${chalk.green('Text:')} ${chalk.magenta(link.text)} \n`;
     output += `${chalk.green('File:')} ${chalk.cyan(link.file)}\n`;
-
+ 
     if (validate) {
       output += ` ${chalk.green('Status:')} ${chalk.red(link.status)} \n`;
       output += ` ${chalk.green('Ok:')} ${chalk.blue(link.ok)}\n`;

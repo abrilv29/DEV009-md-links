@@ -9,16 +9,11 @@
   * [Array.prototype.reduce() - MDN](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)
 
   * [Array.prototype.reduce() - MDN](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)
-  ## 4. Consideraciones generales
+  
+  * [Array.prototype.reduce() - MDN](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)
+  
+  * [Array.prototype.reduce() - MDN](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)
 
-* Este proyecto se debe "resolver" de manera individual.
+  * [Enlace roto](https://jestjs.io/es-ES/ocs/mock-function-api)
 
-* El rango de tiempo estimado para completar el proyecto es de 3 a 5 sprints.
-
-* Consideramos los hitos 1 y 2 como los criterios de aceptación mínimos del proyecto.
-
-* Enfócate en aprender y no solamente en "completar" todos los hitos del proyecto.
-
-* Te sugerimos que no intentes saber todo de Node.js antes de empezar a codear.
-  No es necesario tomar un curso de Node.js completo. Aprenderás a medida que
-  avances en el proceso.
+  * [Enlace roto2](https://www.youtbe.com).
