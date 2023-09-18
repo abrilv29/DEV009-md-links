@@ -4,90 +4,65 @@ const markdownIt = require('markdown-it');
 const encontrarLinks = require('./hito1');
 const validarLink = require('./hito2');
 
+
 const mdLinks = (absolutaPath, validate) => {
   return new Promise((resolve, reject) => {
-    // Convertir la ruta absoluta
-    const convertAbsoluta = path.resolve(absolutaPath);
+    const buscarEnDirectorio = (directoryPath) => {
+      return fs
+        .readdir(directoryPath)
+        .then((items) => {
+          const results = [];
 
-    // Verificamos si la ruta existe
-    fs.access(convertAbsoluta)
-      .then(() => {
-        // Leer la información del archivo o directorio
-        
-        return fs.stat(convertAbsoluta);
-      })
-      .then((stats) => {
-        if (stats.isDirectory()) {
-          // Si es un directorio, leer los archivos dentro de él
-          return fs.readdir(convertAbsoluta);
-        } else if (stats.isFile() && path.extname(convertAbsoluta) === '.md') {
-          // Si es un archivo Markdown válido, leer su contenido
-          return fs.readFile(convertAbsoluta, 'utf-8')
-            .then((contenido) => {
-              const md = markdownIt();
-              const html = md.render(contenido);
-              const links = encontrarLinks(html, convertAbsoluta);
-
-              if (!validate) {
-                resolve(links);
-              } else {
-                const linkPromises = links.map((link) => {
-                  return validarLink(link);
+          const processItem = (item) => {
+            const itemPath = path.join(directoryPath, item);
+            return fs.stat(itemPath).then((itemStat) => {
+              if (itemStat.isDirectory()) {
+                return buscarEnDirectorio(itemPath).then((subdirectoryResults) => {
+                  results.push(...subdirectoryResults);
                 });
+              } else if (itemStat.isFile() && item.endsWith('.md')) {
+                return fs.readFile(itemPath, 'utf-8').then((fileContent) => {
+                  const md = markdownIt();
+                  const html = md.render(fileContent);
+                  const links = encontrarLinks(html, itemPath);
 
-                Promise.all(linkPromises)
-                  .then((validados) => {
-                    resolve(validados);
-                  })
-                  .catch((error) => {
-                    reject(error);
-                  });
+                  if (!validate) {
+                    results.push(...links);
+                  } else {
+                    const linkPromises = links.map((link) => {
+                      return validarLink(link);
+                    });
+
+                    return Promise.all(linkPromises).then((validados) => {
+                      results.push(...validados);
+                    });
+                  }
+                });
               }
             });
-        } else {
-          reject(new Error('El archivo/directorio no es válido.'));
-        }
-      })
-      .then((files) => {
-        // Si es un directorio, procesar los archivos .md dentro de él
-        if (Array.isArray(files)) {
-          const linkPromises = [];
+          };
 
-          files.forEach((file) => {
-            const filePath = path.join(convertAbsoluta, file);
-            const extname = path.extname(filePath);
-
-            if (extname === '.md') {
-              linkPromises.push(
-                fs.readFile(filePath, 'utf-8')
-                  .then((contenido) => {
-                    const md = markdownIt();
-                    const html = md.render(contenido);
-                    const links = encontrarLinks(html, filePath);
-
-                    if (!validate) {
-                      return links;
-                    } else {
-                      const validatedLinks = links.map((link) => {
-                        return validarLink(link);
-                      });
-
-                      return Promise.all(validatedLinks);
-                    }
-                  })
-              );
-            }
+          const itemPromises = items.map((item) => {
+            return processItem(item);
           });
 
-          Promise.all(linkPromises)
-            .then((results) => {
-              const allLinks = validate ? [].concat(...results) : results;
-              resolve(allLinks);
-            })
-            .catch((error) => {
-              reject(error);
-            });
-        }
+          return Promise.all(itemPromises).then(() => {
+            return results;
+          });
+        })
+        .catch((error) => {
+          throw error;
+        });
+    };
+
+    const convertAbsoluta = path.resolve(absolutaPath);
+
+    fs.access(convertAbsoluta)
+      .then(() => {
+        return buscarEnDirectorio(convertAbsoluta);
+      })
+      .then((links) => {
+        resolve(links);
       })
       .catch((error) => {
         reject(error);

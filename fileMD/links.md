@@ -16,5 +16,9 @@ Y un repetido2 [enlace a YouTube](https://www.youtube.com).
 
 [Enlace roto2](https://www.youtbe.com).
 
+[Prime Video](https://www.primevideo.com/).
+
+[Netflix](https://www.netflix.com)
+
 
 
