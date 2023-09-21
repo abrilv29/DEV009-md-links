@@ -34,6 +34,7 @@ const mdLinks = (absolutaPath, validate) => {
                     const links = encontrarLinks(html, itemPath, lineNumbrer + 1); // Encuentra los links en el HTML
                     results.push(...links); // Agregar los links encontrados al resultado
 
+                  
                     if (validate) {
                       // Si se requiere validación, crea un array de promesas de validación para los links de esta línea
                       const linkPromises = links.map((link) => {
@@ -52,7 +53,6 @@ const mdLinks = (absolutaPath, validate) => {
               }
             });
           };
-
           const itemPromises = items.map((item) => {
             return processItem(item); // Procesa cada item del directorio
           });

@@ -1,5 +1,5 @@
 {
-  "name": "abril-mdlinks",
+  "name": "md-links-abril",
   "version": "0.1.0",
   "description": "md-links CLI",
   "main": "index.js",
@@ -13,9 +13,17 @@
   "bin": {
     "md-links": "./cli.js"
   },
+  
+  "bugs": {
+    "url": "https://github.com/abrilv29/DEV009-md-links/issues"
+  },
   "scripts": {
     "test": "jest --coverage",
     "eslint": "eslint --ext .js ./test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abrilv29/DEV009-md-links.git"
   },
   "devDependencies": {
     "eslint": "^8.3.0",
@@ -34,6 +42,7 @@
     "chalk": "^4.1.2",
     "cheerio": "^1.0.0-rc.12",
     "cli-boxes": "^3.0.0",
+    "color": "^4.2.3",
     "figlet": "^1.6.0",
     "markdown-it": "^13.0.1",
     "yargs": "^17.7.2"
