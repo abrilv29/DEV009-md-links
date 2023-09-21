@@ -175,6 +175,15 @@ Forma de instalación del paquete usando github.
 ![prueba instalacion](img/prueba.png)
 
 
+Instalacion via NPM
+
+                           npm i md-links-abril
+
+### Uso de la herramienta 
+
+El paquete md-links proporciona una herramienta eficiente para analizar archivos Markdown en busca de enlaces y validarlos si es necesario. Su funcionalidad puede ser valiosa en diversas situaciones de desarrollo y gestión de contenido basado en Markdown.
+
+
 ## 6. Test Unitarios
 
 Manejo de  pruebas unitarias de acuerdo a la función mdlinks y axios.
