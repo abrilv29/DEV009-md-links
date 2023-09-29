@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const fs = require('fs/promises'); // Importa el módulo fs
+const fs = require('fs'); // Importa el módulo fs
 const figlet = require('figlet');
 const chalk = require('chalk');
 const mdLinks = require('./index.js');
@@ -34,175 +34,87 @@ figlet(texto, function (err, data) {
   colorDegradado(data, colores);
 });
 
-/*--------------------Menu de opciones para CLI -----------------------------------------------*/
+/*------------------ --------------------------OPTION WITH YARGS ----------------------------------------------*/
+
+const argv = yargs
+  .usage(`Usage: ${chalk.cyan('$0')} ${chalk.green('<path>')} [options]`)
+  .demandCommand(1, chalk.red('You must specify a path to a file or directory.'))
+  .options({
+    validate: {
+      describe: chalk.magenta('Validate links'),
+      boolean: true,
+    },
+    stats: {
+      describe: chalk.cyan('Show link statistics'),
+      boolean: true,
+    },
+  })
+  .help()
+  .alias('h', 'help')
+  .argv;
 
 
-// Configuración de yargs
-yargs
-
-.command('$0 <ruta>', chalk.green('     Encuentra y muestra los enlaces en archivos Markdown    '), (yargs) => {
-  yargs.positional(chalk.cyan.bold('ruta'), {
-    describe: chalk.hex('#6512B8').bold('Ruta al directorio o archivo Markdown'),
-    type: 'string',
-  });
-})
-.option(chalk.hex('#6512B8').bold('validate'), {
-  alias: chalk.hex('#6512B8').bold('v'),
-  describe: chalk.hex('#6512B8').bold('Validar los enlaces'),
-  type: chalk.hex('#6512B8').bold('boolean'),
-})
-.option(chalk.hex('#6512B8').bold('stats'), {
-  alias: chalk.hex('#6512B8').bold('s'),
-  describe: chalk.hex('#6512B8').bold('Mostrar estadísticas de los enlaces unicos'),
-  type: 'boolean',
-})
-.option(chalk.hex('#6512B8').bold('validate', 'stats'), {
-  alias: chalk.hex('#6512B8').bold('v','s'),
-  describe: chalk.hex('#6512B8').bold('Mostrar estadísticas de los enlaces rotos'),
-  type: 'boolean',
-})
-
-
-.help().argv;
-
-const { ruta, validate, stats } = yargs.argv;
-
- // Manejo de Errores para las rutas
-
-const verificarRuta = async () => {
-  try {
-    const rutaStat = await fs.stat(ruta);
-    if (rutaStat.isDirectory()) {
-      // Verifica si el directorio está vacío
-      const items = await fs.readdir(ruta);
-      if (items.length === 0) {
-        console.error('Error: Directorio vacío. No se encontraron archivos Markdown en el directorio.');
-        process.exit(1);
-      }
-    } else if (!ruta.endsWith('.md')) {
-      console.error(`Error: El archivo '${ruta}' no es un archivo Markdown.`);
-      process.exit(1);
-    }
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1);
+  
+  const path = argv._[0];
+  
+  // Verifica si la ruta existe
+  if (!fs.existsSync(path)) {
+    console.error('La ruta especificada no existe.');
+    process.exit(1); // Sale del programa con un código de error
   }
+
+
+
+  // Si la ruta es válida, continúa con el procesamiento
+  
+
+const options = {
+  validate: argv.validate || false,
+  stats: argv.stats || false,
 };
-// Llama a la función asíncrona para verificar la ruta
-verificarRuta();
 
-
-// Función para mostrar enlaces en un formato específico
-const mostrarEnlaces = (links) => {
-  console.log(chalk.blue(`
-  ---------------------------------------------------------------------------
-
-           M   O   S   T   R   A   R  * *  E   N  L   A   C   E   S
-  
- --------------------------------------------------------------------------- 
-  
-  `));
-
-
-  return links.map((link) => {
-    let output;
-  
-    output = `${chalk.bgYellow.bold('href:')} ${chalk.yellow(link.href)} \n`;
-    output += `${chalk.bgMagenta.bold('Text:')} ${chalk.magenta(link.text)} \n`;
-    output += `${chalk.bgRgb(5,203,230).bold('File:')} ${chalk.hex('#05CBE6')(link.file)}\n`;
-    output += `${chalk.bgRgb(162,51,255).bold('Line:')} ${chalk.hex('#A233FF').bold(link.line)}\n`; // Agregar la línea
- 
-    if (validate) {
-      output += ` ${chalk.bgRedBright.bold('Status:')} ${chalk.red.bold(link.status)} \n`;
-      output += ` ${chalk.bgGreenBright.bold('Ok:')} ${chalk.green.bold(link.ok)}\n`;
+mdLinks(path, options)
+  .then((results) => {
+    if (options.validate && options.stats) {
+      // --validate y --stats juntos
+      console.log('Links validados y estadísticas:');
+      console.log(chalk.bgCyan.bold('Total de links:'), chalk.cyan(results.length));
+      console.log(chalk.bgGreenBright.bold('Links únicos:'), chalk.green(new Set(results.map((link) => link.href)).size));
+      console.log(chalk.bgYellowBright.bold('Links rotos:'), chalk.yellow(results.filter((link) => link.status !== 200).length));
+    } else if (options.validate) {
+      // Solo --validate
+      console.log('Links validados:');
+      results.forEach((link) => {
+        console.log(`${chalk.bgYellow.bold('href:')} ${chalk.yellow(link.href)}`);
+        console.log(`${chalk.bgMagenta.bold('Text:')} ${chalk.magenta(link.text)}`);
+        console.log(`${chalk.bgRgb(5,203,230).bold('File:')} ${chalk.hex('#05CBE6')(link.file)}`);
+        console.log(`${chalk.bgRgb(162,51,255).bold('Line:')} ${chalk.hex('#A233FF').bold(link.line)}`); // Agregar la línea
+        console.log(`${chalk.bgRedBright.bold('Status:')} ${chalk.red.bold(link.status)}`);
+        console.log(`${chalk.bgGreenBright.bold('Ok:')} ${chalk.green.bold(link.ok)}`);
+        console.log('---');
+        
+      });
+    } else if (options.stats) {
+      // Solo --stats
+    
+      console.log(chalk.yellow('Estadísticas de links:'));
+      console.log(chalk.bgCyan.bold('Total de links:'), chalk.cyan(results.length));
+      console.log(chalk.bgGreenBright.bold('Links únicos:'), chalk.green(new Set(results.map((link) => link.href)).size));
+    
     }
-    return output;
+    
+    else {
+      // Sin opciones adicionales
+      console.log(' Links encontrados ');
+      results.forEach((link) => {
+        console.log(`${chalk.bgYellow.bold('href:')} ${chalk.yellow(link.href)}`);
+        console.log(`${chalk.bgMagenta.bold('Text:')} ${chalk.magenta(link.text)}`);
+        console.log(`${chalk.bgRgb(5,203,230).bold('File:')} ${chalk.hex('#05CBE6')(link.file)}`);
+        console.log('---');
+      });
+    }
+  })
+  .catch((error) => {
+    console.error('Error:', error.message);
+    process.exit(1);
   });
-  
-};
-
-const optionValidate = (ruta) => {
-  mdLinks(ruta, { validate })
-    .then((links) => {
-      const formattedLinks = mostrarEnlaces(links);
-      formattedLinks.forEach((formattedLink) => console.log(formattedLink));
-    })
-    .catch((error) => {
-      console.error(error.message);
-    });
-};
-
-const optionStats = (ruta) => {
-  mdLinks(ruta, { validate: true }) // No se necesita validación aquí
-    .then((links) => {
-      if (stats) {
-        const totalLinks = links.length;
-        const uniqueLinks = new Set(links.map((link) => link.href)).size;
-        const boxStyle = cliBoxes.singleDouble; // Obtener el estilo de caja
-        const labelWidth = 8;
-        const boxedOutput =
-        `${boxStyle.topLeft}${boxStyle.top.repeat(22)}${boxStyle.topRight}\n` +
-        `${boxStyle.left}${`${chalk.bgCyan.bold('Total  :')}${chalk.cyan(totalLinks)}`.padEnd(59 - labelWidth, ' ')}${boxStyle.right}\n` +
-        `${boxStyle.left}${`${chalk.bgGreenBright.bold('Unique :')}${chalk.green(uniqueLinks)}`.padEnd(60 - labelWidth, ' ')}${boxStyle.right}\n` +
-        `${boxStyle.bottomLeft}${boxStyle.bottom.repeat(22)}${boxStyle.bottomRight}`;
-        console.log(boxedOutput);
-      } else {
-        const formattedLinks = mostrarEnlaces(links);
-        formattedLinks.forEach((formattedLink) => console.log(formattedLink));
-      }
-    })
-    .catch((error) => {
-      console.error(error.message);
-    });
-};
-
-const optionValidateStats = (ruta) => {
-  mdLinks(ruta, { validate: true })
-
-    .then((links) => {
-      if (stats) {
-        const totalLinks = links.length;
-        const uniqueLinks = new Set(links.map((link) => link.href)).size;
-        const brokenLinks = links.filter((link) => link.ok === 'fail').length; // Filtra los enlaces rotos
-
-        const boxStyle = cliBoxes.singleDouble; // Obtener el estilo de caja
-        const labelWidth = 8;
-        const boxedOutput =
-        `${boxStyle.topLeft}${boxStyle.top.repeat(22)}${boxStyle.topRight}\n` +
-        `${boxStyle.left}${`${chalk.bgCyan.bold('Total  :')}${chalk.cyan(totalLinks)}`.padEnd(59 - labelWidth, ' ')}${boxStyle.right}\n` +
-        `${boxStyle.left}${`${chalk.bgGreenBright.bold('Unique :')}${chalk.green(uniqueLinks)}`.padEnd(60 - labelWidth, ' ')}${boxStyle.right}\n` +
-        `${boxStyle.left}${`${chalk.bgYellowBright.bold('Broken :')}${chalk.yellow(brokenLinks)}`.padEnd(60 - labelWidth, ' ')}${boxStyle.right}\n` +
-        `${boxStyle.bottomLeft}${boxStyle.bottom.repeat(22)}${boxStyle.bottomRight}`;
-        console.log(boxedOutput);
-      } else {
-        const formattedLinks = mostrarEnlaces(links);
-        formattedLinks.forEach((formattedLink) => console.log(formattedLink));
-      }
-    })
-    .catch((error) => {
-      console.error(error.message);
-    });
-};
-
-// Determina qué función llamar según las opciones
-if (validate && stats) {
-  optionValidateStats(ruta);
-} else if (validate) {
-  optionValidate(ruta);
-} else if (stats) {
-  optionStats(ruta);
-} else {
-  // Llama a la función mdLinks sin validación ni estadísticas
-  mdLinks(ruta, { validate: false })
-    .then((links) => {
-      if (links.length === 0) {
-        console.log('No se encontraron enlaces en el archivo o directorio especificado.');
-      } else {
-        const formattedLinks = mostrarEnlaces(links);
-        formattedLinks.forEach((formattedLink) => console.log(formattedLink));
-      }
-    })
-    .catch((error) => {
-      console.error(error.message);
-    });
-}
